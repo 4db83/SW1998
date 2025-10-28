@@ -1,2 +1,14 @@
 # SW1998
-Stock and Watso (1998) Replication files
+Stock and Watson (1998) Replication files. 
+This runs on Matlab version R2023a with the following toolboxes installed.
+
+MATLAB                                                Version 9.14        (R2023a)
+Econometrics Toolbox                                  Version 6.2         (R2023a)
+Optimization Toolbox                                  Version 9.5         (R2023a)
+Parallel Computing Toolbox                            Version 7.8         (R2023a)
+Statistics and Machine Learning Toolbox               Version 12.5        (R2023a)
+Symbolic Math Toolbox   
+
+PS. The Parallel Computing & Symbolic Math Toolbox are not needed. Most likely it is only the 
+Optimization Toolbox that is required. 
+
