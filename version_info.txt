@@ -1,0 +1,13 @@
+>> ver
+-----------------------------------------------------------------------------------------------------
+MATLAB Version: 9.14.0.2337262 (R2023a) Update 5
+Operating System: Microsoft Windows 11 Education Version 10.0 (Build 26100)
+Java Version: Java 1.8.0_202-b08 with Oracle Corporation Java HotSpot(TM) 64-Bit Server VM mixed mode
+-----------------------------------------------------------------------------------------------------
+MATLAB                                                Version 9.14        (R2023a)
+Econometrics Toolbox                                  Version 6.2         (R2023a)
+Optimization Toolbox                                  Version 9.5         (R2023a)
+Parallel Computing Toolbox                            Version 7.8         (R2023a)
+Statistics and Machine Learning Toolbox               Version 12.5        (R2023a)
+Symbolic Math Toolbox                                 Version 9.3         (R2023a)
+>> 

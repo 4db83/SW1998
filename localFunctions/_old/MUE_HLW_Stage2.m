@@ -1,0 +1,177 @@
+%% Median Unbiased Estimation as implemented in HLW(2017). 
+function [Lambdas, Stats] = MUE_HLW_Stage2(Yin, Xin)
+
+T		= size(Yin,1);
+Tvec= (1:T)';
+
+% space for Fstat.
+Fstat_0 = nan(T,1);
+tstat_0 = nan(T,1);
+
+% NOW LOOP TROUGHT T0 TO TT
+
+for tt = 4:(T-4) % note it is 4:(T-4) as i in 4:(T-5) means that in R
+ 	ols_out	= fullols(Yin,[Xin Tvec > tt],1);
+% 	Fstat_0(tt) = ols_out.Fstat;				% same as tstat(end)^2
+ 	tstat_0(tt) = ols_out.tstat(end);	% not used
+end
+Fstat_0 = tstat_0.^2;
+
+% Wald versions of the test
+Fstat			= removenan(Fstat_0);
+sup_Fstat = max(Fstat);
+exp_Wald	= log(mean(exp(Fstat/2)));
+mean_Fstat= mean(Fstat);
+
+% Nyblom's test is simply: e_cumsum'e_cumsum/T divided by Var(e), where e = xfilt-mean(xfilt).
+e			= demean(Yin);
+e_cs	= cumsum(e)/sqrt(T);
+Lstat	= (e_cs'*e_cs/T)/var(Yin); 
+
+% Combine tests for printing later (IF ORDER CHANGED, MUST CHANGE ORDER OF CRITICALVALS AS WELL)
+Stats.L		= Lstat; 
+Stats.MW	= mean_Fstat; 
+Stats.EW	= exp_Wald; 
+Stats.QLR = sup_Fstat; % QLR
+
+%% NOW GET/LOAD THE CRITICAL LAMBDA VALUES FROM THE COARSE GRID AS THE TABLE IN SW1998 AND AS USE IN HLW2017.
+Lambda_table = (0:30)';
+% L				MW				EW				QLR
+CritVals = [
+0.118	 	 0.689		 0.426	 	 3.198
+0.127	 	 0.757		 0.476		 3.416
+0.137	 	 0.806		 0.516		 3.594
+0.169	 	 1.015		 0.661		 4.106
+0.205	 	 1.234		 0.826		 4.848
+0.266	 	 1.632		 1.111		 5.689
+0.327	 	 2.018		 1.419		 6.682
+0.387	 	 2.390		 1.762		 7.626
+0.490	 	 3.081		 2.355		 9.160
+0.593	 	 3.699		 2.910		10.660
+0.670	 	 4.222		 3.413		11.841
+0.768	 	 4.776		 3.868		13.098
+0.908	 	 5.767		 4.925		15.451
+1.036	 	 6.586		 5.684		17.094
+1.214	 	 7.703		 6.670		19.423
+1.360	 	 8.683		 7.690		21.682
+1.471	 	 9.467		 8.477		23.342
+1.576	 	10.101		 9.191		24.920
+1.799	 	11.639		10.693		28.174
+2.016	 	13.039		12.024		30.736
+2.127	 	13.900		13.089		33.313
+2.327	 	15.214		14.440		36.109
+2.569	 	16.806		16.191		39.673
+2.785	 	18.330		17.332		41.955
+2.899	 	19.020		18.699		45.056
+3.108	 	20.562		20.464		48.647
+3.278	 	21.837		21.667		50.983
+3.652	 	24.350		23.851		55.514
+3.910	 	26.248		25.538		59.278
+4.015	 	27.089		26.762		61.311
+4.120	 	27.758		27.874		64.016
+];
+
+%%
+testStats = struct2array(Stats);
+% testNames = {'L';'MW';'EW';'QLR'}; % SW = QLR
+testNames = fieldnames(Stats);
+% fprintf(' Test is: %s \n', char(testNames(ii)))
+
+% loop through the 4 main tests
+for ii = 1:4
+	test_stat = testStats(ii);
+	crit_val	= CritVals(:,ii);
+	% get indicator
+	isGreater = test_stat > crit_val;
+	IL1 = find(isGreater,	1, 'Last');
+	IL0 = find(isGreater);
+	
+	if(isempty(IL))
+		Lambda_hat(ii,1) = 0;
+	elseif(IL==31) % if we are at the last table entry, just return that without interpolation
+		Lambda_hat(ii,1) = CritVals(31,ii) / T;
+	else
+		% now interpolate the two adjacent observations and divide by T
+		Lambda_hat(ii,1) = interp1(crit_val(IL:IL+1), Lambda_table(IL:IL+1), test_stat) / T;
+	end
+	% now make a structure with the fields equal to the testNames 
+	Lambdas.(testNames{ii}) = Lambda_hat(ii);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% EOF 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

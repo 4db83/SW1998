@@ -1,0 +1,179 @@
+function [negLL, struct_out] = LogLike_Stage2_DB_SSF_g(starting_values, data_input, other_inputs, KFS_on)
+% Stage 2 model results of HLW(2017) -> exactly using their data, misspecfied S2-SSF.
+% BUT ESTIMATE SIGMA_G by MLE!
+% ------------------------------------------------------------------------------------------------------
+% Their SSF is:
+% ------------------------------------------------------------------------------------------------------
+% 	Y(t) = A*X(t) + H*Xi(t) + v(t), Var(v) = R
+%  Xi(t) = F*Xi(t-1) + S*e(t),			Var(e) = Q
+% ------------------------------------------------------------------------------------------------------
+% MY STATE SPACE FORM IS:
+% 		Observed:	Y(t)			= D(t) + M*alpha(t)			+ e(t);		Var(e_t) = H.
+% 		State:		alpha(t)	= C(t) + Phi*alpha(t-1)	+ S*n(t);	Var(n_t) = Q.
+% ------------------------------------------------------------------------------------------------------
+% CALL AS: 
+% ------------------------------------------------------------------------------------------------------
+% 		[LogLik, att, Ptt] = kalmanfilter(y, D, M, H, C, Phi, Q, R, a1, P1) 
+% Pmean.att = kalmanfilter(Y, Pmean.Dt, Pmean.M, Pmean.H, Ct, Phi, Pmean.Q, R, a00, P00); 
+% ******************************************************************************************************
+% DIFFUSE PRIOR parsed through other_inputs
+% ******************************************************************************************************
+
+SetDefaultValue(4,'KFS_on',0);
+
+nS	= 10;		% Number of rows in state vector alpha
+nQ	= 4;		% Number of shocks in state vector alpha
+% nI1	= 1;		% Number of I(1) variables in state vector alpha
+
+% OTHER INPUTS
+% initial state mean and variance
+a00 = other_inputs.a00;
+P00 = other_inputs.P00;
+Lambda_g = other_inputs.Lambda_g;
+
+% STARTING VALUES
+% mean parameters
+a_y1	= starting_values(1);
+a_y2	= starting_values(2);
+a_r		= starting_values(3);
+% a_0		= starting_values(4);
+% a_g		= starting_values(5);
+
+b_pi	= starting_values(4);
+b_y		= starting_values(5);
+
+% VARIANCES
+s2_ytld	= starting_values(end-3)^2;                
+s2_pi		= starting_values(end-2)^2;                
+s2_ystr	=	starting_values(end-1)^2;                
+s2_g		= starting_values(end  )^2;			% sigma2_g 
+
+% ------------------------------------------------------------------------------------------------------
+% INPUT DATA
+% ------------------------------------------------------------------------------------------------------
+Y = data_input(1:2,:);
+X = data_input(3:end,:);
+
+% ------------------------------------------------------------------------------------------------------
+% MAKE MEASURMENT EQUATION PARAMETERS [D M H]
+% ------------------------------------------------------------------------------------------------------
+% MAKE THEIR A FOR EXOGENEOUS VARIABLES
+% A = [	a_y1 a_y2 a_r/2 a_r/2  0     0				a_0;
+% 			b_y  0    0     0      b_pi (1-b_pi)  0];
+
+% MAKE Dt
+D = zeros(2,1);
+
+% THEIR H. unrestricted a_g here!
+M = zeros(2,nS);
+M(1,1) = 1;
+M(1,9) = 1;
+M(2,3) = 1;
+
+% normally we have this for the Stage 3 model where the coefficients on g(t) and z(t) are restricted to be -a_r/2 (and annualized for g(t) trend growth)
+% M = [ 1 -a_y1 -a_y2  -4*a_r/2  -4*a_r/2  -a_r/2  -a_r/2;
+% 			0 -b_y   0      0					0					0				0			];
+
+% VARIANCE OF MEASUREMENT
+H	= zeros(2,2);
+
+% ------------------------------------------------------------------------------------------------------
+% MAKE STATE EQUATION PARAMTERS [C Phi R Q]
+% ------------------------------------------------------------------------------------------------------
+% Make the C(t) matrix here as ar/2(sum(i(t-1)+i(t-2))
+C		= zeros(nS,T) 
+
+Phi = [ a_y1  a_y2  0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     0     0     0  ; 
+     		0     0     0     0     0     0     0     1     1     0  ; 
+     		0     0     0     0     0     0     0     0     1     0  ; 
+     		0     0     0     0     0     0     0     0     1     0  ];
+
+
+% SELECTION MATRIX S: set to identity when using the hlw specifiacition with lambdas 
+S = zeros(nS,nQ);
+S(1,1) = 1;
+S(3,2) = 1;
+S(8,3) = 1;
+S(9,4) = 1;
+
+% VARIANCE OF STATES
+Q = zeros(nQ);
+Q(1,1) = s2_ytld;
+Q(2,2) = s2_pi;
+Q(3,3) = s2_ystr;
+Q(4,4) = s2_g;
+
+
+% LIKELIHOOD FUNCTION FROM KF RECURSIONS
+LL = kalman_filter_loglike(Y, D, M, H, C, Phi, Q, S, a00, P00);
+
+% RETURN NEGATIVE FOR MINIMIZATION
+negLL = -LL;
+
+% ------------------------------------------------------------------------------------------------------
+% RETURN THE OPTIONAL STRUCTURE OF PARMATERS
+% ------------------------------------------------------------------------------------------------------
+struct_out.D = D;
+struct_out.M = M;
+struct_out.H = H;
+
+struct_out.C = C;
+struct_out.Phi = Phi;
+struct_out.S = S;
+struct_out.Q = Q;
+
+struct_out.a00 = a00;
+struct_out.P00 = P00;
+% loglikelihood LL, not the negative, ie. -LL 
+struct_out.LL	 = LL;	 
+
+% Kalman Filter and Smooth the results now
+if KFS_on
+	struct_out.KFS = kalman_filter_smoother(Y, D, M, H, C, Phi, Q, S, a00, P00, 0);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%  EOF
