@@ -1,5 +1,5 @@
 ## SW1998
-Stock and Watson (1998) Replication files. 
+Stock and Watson (1998) Replication files (see the [SW1998](SW1998.pdf) pdf file for details on the paper). 
 This runs on Matlab version R2023a with the following toolboxes installed.
 
 ### MATLAB
