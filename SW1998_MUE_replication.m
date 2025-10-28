@@ -16,8 +16,8 @@
 clear; clc;
 set(groot,'defaultLineLineWidth',2); % sets the default linewidth to 1.5;
 % ADD LOCAL FUNCTION PATH WITHOUT SUBFOLDERS (IE. '_OLD') (only add what is needed)
-% CALL: restoredefaultpath (to restore to default path)
 addpath(genpath('./localFunctions/'));
+% CALL: restoredefaultpath (to restore to default path)
 
 % figdir = './UC.figures/';
 data_dir			= './_data/';
