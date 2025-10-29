@@ -15,5 +15,10 @@ Optimization Toolbox that is required.
 Zip download or clone the SW1998 directory to your local machine. Then, simply run the '*SW1998_MUE_replication.m*' by pressing F5 (or the run button), and it should work.
 Let me know if there any problems.
 
+### Ghostscript (for PDF figures)
+- Install Ghostscript for Windows from https://ghostscript.com/download/.  
+- Edit `localFunctions/print2pdf.m` so that `GSversion` and the `GS` path point to your installed `gswin64c.exe` (or `gswin32c.exe`).  
+- Without Ghostscript the script still saves EPS files, but PDF copies will not be produced.
+
 
 db, sthlm, 28.10.2025.
