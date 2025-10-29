@@ -39,7 +39,7 @@ if contains(file_,'.pdf')
   file_ = file_(1:end-4);
 end
 % Adjust GS to point at the Ghostscript executable (gswin64c.exe or gswin32c.exe).
-GS			= ['D:\arthur\gs\gs' GSversion '\bin\gswin64c.exe'];
+GS			= ['C:\Program Files\gs\gs' GSversion '\bin\gswin64c.exe'];
 figHandle = gcf;
 
 origPrintProps.Units               = get(figHandle,'Units');
