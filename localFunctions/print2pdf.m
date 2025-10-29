@@ -11,10 +11,9 @@ function [] = print2pdf(filename, dirname, make_eps_figure, make_emf_figure)
 % db 24.02.2017.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAKE IT A STRING
-% DO NOT UPDATE TO GSversion > '10.00.0';           
-% GSversion = '9.56.1';          % set to the GSversion that is install in C:\Program Files\
-GSversion = '10.00.0';           % set to the GSversion that is install in C:\Program Files\
-% set to the GSversion that is install in C:\Program Files\  
+% Update GSversion (and the path below) to match your Ghostscript installation.
+% Example: GSversion = '10.02.1' for C:\Program Files\gs\gs10.02.1\bin\gswin64c.exe
+GSversion = '10.00.0';           % set to the GSversion that is installed in C:\Program Files\
 
 SetDefaultValue(2 ,'dirname'				, './');
 SetDefaultValue(3 ,'make_eps_figure', 0);
@@ -39,17 +38,30 @@ file_ 	= char(filename); % make sure it is not a cell input
 if contains(file_,'.pdf')
   file_ = file_(1:end-4);
 end
-% GS			= ['C:\Program Files\gs\gs' num2str(GSversion,'%2.2f') '\bin\gswin64c.exe'];
-GS			= ['C:\Program Files\gs\gs' GSversion '\bin\gswin64c.exe'];
-%           C:\Program Files\gs\gs10.00.0\bin\
-% NOT NEEDED ANY MORE. 
-% % print('-depsc', file_);
-% h = gcf;
-set(gcf,'PaperPositionMode','auto');         
+% Adjust GS to point at the Ghostscript executable (gswin64c.exe or gswin32c.exe).
+GS			= ['D:\arthur\gs\gs' GSversion '\bin\gswin64c.exe'];
+figHandle = gcf;
+
+origPrintProps.Units               = get(figHandle,'Units');
+origPrintProps.Position            = get(figHandle,'Position');
+origPrintProps.PaperUnits          = get(figHandle,'PaperUnits');
+origPrintProps.PaperPosition       = get(figHandle,'PaperPosition');
+origPrintProps.PaperPositionMode   = get(figHandle,'PaperPositionMode');
+origPrintProps.PaperSize           = get(figHandle,'PaperSize');
+cleanupPrintObj = onCleanup(@() restorePrintFigureSettings(figHandle,origPrintProps)); %#ok<NASGU>
+
+set(figHandle,'PaperPositionMode','auto');
+
+% width x height (inches) chosen to match the archival SW98 PDF aspect ratio
+targetPaperSize = [12.236 22.694];
+set(figHandle,'PaperUnits','inches');
+set(figHandle,'PaperSize',targetPaperSize);
+set(figHandle,'PaperPositionMode','manual');
+set(figHandle,'PaperPosition',[0 0 targetPaperSize]);
 
 % SINCE MATLAB R2016a, NEED DIFFERENT DEFAULT RENDERER (NOT SURE WHY THEY DID THIS, BUT THIS WORKS NOW)
 % SET default renderer FROM 'zbuffer' TO 'painters'
-set(gcf,'renderer','painters')
+set(figHandle,'renderer','painters')
 
 % output_name = 
 
@@ -59,9 +71,9 @@ if make_eps_figure
 	if ~(exist([dirname 'eps.figs/'], 'dir')==7) 
 			 mkdir([dirname 'eps.figs/']); 	
 	end
-		print(gcf,'-depsc2', [dirname 'eps.figs/' file_ '.eps']);
+		print(figHandle,'-depsc2', [dirname 'eps.figs/' file_ '.eps']);
 else
-		print(gcf,'-depsc2', [dirname file_ '.eps']);
+		print(figHandle,'-depsc2', [dirname file_ '.eps']);
 end
 
 % [dirname '/' file_]
@@ -75,9 +87,9 @@ if make_emf_figure==1
 	if ~(exist([dirname 'emf.figs/'], 'dir')==7)
 		   mkdir([dirname 'emf.figs/'])
 	end
-	print(gcf,'-dmeta', [dirname '/emf.figs/' file_ '.emf']);
+	print(figHandle,'-dmeta', [dirname '/emf.figs/' file_ '.emf']);
 elseif make_emf_figure==2
-	print(gcf,'-dmeta', [dirname '/' file_ '.emf']);
+	print(figHandle,'-dmeta', [dirname '/' file_ '.emf']);
 end
 
 % ORIENTATION
@@ -448,4 +460,20 @@ if isempty(ind)
 else
     outstr = str( ind(1):ind(end) );
 end
+%--------------------------------------------------------------------
+
+%--------------------------------------------------------------------
+function restorePrintFigureSettings(figHandle, originalProps)
+% Restores figure sizing and paper settings after printing adjustments.
+if ~ishghandle(figHandle)
+    return
+end
+set(figHandle,'PaperUnits',originalProps.PaperUnits);
+set(figHandle,'PaperSize',originalProps.PaperSize);
+set(figHandle,'PaperPositionMode',originalProps.PaperPositionMode);
+if strcmpi(originalProps.PaperPositionMode,'manual')
+    set(figHandle,'PaperPosition',originalProps.PaperPosition);
+end
+set(figHandle,'Units',originalProps.Units);
+set(figHandle,'Position',originalProps.Position);
 %--------------------------------------------------------------------
