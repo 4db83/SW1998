@@ -179,6 +179,9 @@ function varargout = legendflex(varargin)
 %               (or squishing, via use of negative values) things via this
 %               parameter. [2 1 1]   
 %
+%   linespacing: scalar multiplier applied to the default row spacing. Values
+%                below 1 tighten the legend vertically, while values above 1 add
+%                extra white space. [1]
 %   nolisten:   logical scalar.  If true, don't add the event listeners.
 %               The event listeners update the legend objects when you
 %               change a property of the labeled objects (such as line
@@ -299,6 +302,7 @@ p.addParameter('bufferunit', 'pixels',			@(x) validateattributes(x, {'char'}, {}
 p.addParameter('box',        'on',					@(x) validateattributes(x, {'char'}, {}));
 p.addParameter('title',      '',						@(x) validateattributes(x, {'char','cell'}, {}));
 p.addParameter('padding',    [6 5 6],				@(x) validateattributes(x, {'numeric'}, {'size', [1 3]})); % 'nonnegative'
+p.addParameter('linespacing',    1,			@(x) validateattributes(x, {'numeric'}, {'scalar','positive'}));
 p.addParameter('nolisten',   false,					@(x) validateattributes(x, {'logical'}, {'scalar'}));
 p.addParameter('FntName','Times New Roman', @(x) validateattributes(x, {'char'}, {}));
 p.addParameter('boxlinewidth', 1,						@(x) validateattributes(x, {'numeric'}, {} ));
@@ -474,7 +478,7 @@ vmarginNm =  0.275/nobj;
 vmarginPx = legpospx(4) * vmarginNm;
 
 rowHeightNm = (1 - vmarginNm)/nobj;
-rowHeight = rowHeightNm .* legpospx(4);
+rowHeight = rowHeightNm .* legpospx(4) * Opt.linespacing;
 
 % Determine width needed for each text string
 

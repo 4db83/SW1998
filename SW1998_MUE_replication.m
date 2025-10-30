@@ -541,7 +541,7 @@ legendflex(LG, {'GY';
 								'$\hat\sigma^{\mathrm{up}}_{\Delta\beta}=0.62$';
 								'MPLE';
 								'MMLE';
-								'SW.GAUSS';}, 'fontsize',Fns-4, 'Interpreter','Latex', 'buffer', [0 0]);
+								'SW.GAUSS';}, 'fontsize',Fns-4, 'Interpreter','Latex', 'linespacing',0.7, 'buffer', [0 0]);
 
 
 % --------------------------------------------------------------------------------------------
